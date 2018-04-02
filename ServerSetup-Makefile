@@ -1,0 +1,57 @@
+SHELL := /bin/bash
+
+# MakeFile to setup server for Django + Nginx + gUnicorn + Supervisor
+
+# run make project=project git_url=gitsshurl init
+
+setup-python:
+	sudo apt-get update
+	sudo apt-get install libpython2.7-dev -y
+	sudo apt-get install libpq-dev -y
+	sudo apt-get install libncurses5-dev -y
+	sudo apt-get install libxml2-dev libxslt1-dev python-dev -y
+	sudo pip install virtualenv
+	sudo apt-get install gunicorn -y
+
+setup-node:
+	curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+	sudo apt-get install nodejs -y
+	sudo apt-get install build-essential
+	sudo npm install -g yarn
+	echo " >>> Node installed <<"
+
+setup-postgres:
+	sudo apt-get install postgresql postgresql-contrib -y
+	sudo vim /etc/postgresql/9.5/main/pg_hba.conf
+	psql -U postgres -c "CREATE DATABASE www_$(project);"
+	psql -U postgres -c "CREATE USER $(project) WITH PASSWORD 'password';"
+	GRANT ALL PRIVILEGES ON DATABASE www_$(project) TO $(project);
+
+setup-nginx:
+	sudo apt-get install nginx -y
+	sudo cp var/www/$(project)/confs/nginx.conf /etc/nginx/sites-available/$(project)
+	sudo ln -s /etc/nginx/sites-available/$(project) /etc/nginx/sites-enabled
+
+
+setup-supervisor:
+	sudo apt-get install supervisor -y
+	sudo touch /etc/supervisor/conf.d/$(project).conf
+
+setup-app:
+	mkdir -p var/www
+	mkdir var/www/logs
+	cd var/www/ && git clone $(git_url) $(project)
+	cd var/www/$(project) &&  cp ./confs/local_settings.py ./base/
+	cd var/www/$(project) && virtualenv venv
+	cd var/www/$(project) && source venv/bin/activate
+	cd var/www/$(project) && pip install -r requirements.txt
+	cd var/www/$(project) && mkdir media
+	cd var/www/$(project) && make deps
+
+
+init:
+	make setup-python
+	make setup-node
+	make setup-app
+	make setup-supervisor
+	make setup-nginx
