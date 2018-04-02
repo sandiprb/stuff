@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 # MakeFile to setup server for Django + Nginx + gUnicorn + Supervisor
 
-# run make project=project git_url=gitsshurl init
+# run make project=project_name git_url=gitsshurl init
 
 setup-python:
 	sudo apt-get update
