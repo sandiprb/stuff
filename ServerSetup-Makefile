@@ -25,7 +25,7 @@ setup-postgres:
 	sudo vim /etc/postgresql/9.5/main/pg_hba.conf
 	psql -U postgres -c "CREATE DATABASE www_$(project);"
 	psql -U postgres -c "CREATE USER $(project) WITH PASSWORD 'password';"
-	GRANT ALL PRIVILEGES ON DATABASE www_$(project) TO $(project);
+	psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE www_$(project) TO $(project);"
 
 setup-nginx:
 	sudo apt-get install nginx -y
@@ -47,7 +47,6 @@ setup-app:
 	cd var/www/$(project) && pip install -r requirements.txt
 	cd var/www/$(project) && mkdir media
 	cd var/www/$(project) && make deps
-
 
 init:
 	make setup-python
