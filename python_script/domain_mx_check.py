@@ -2,6 +2,9 @@ import logging
 
 # Note: dnspython dependency is required for this to work
 import dns.resolver, dns.exception
+import sys
+
+print(sys.argv)
 
 logger = logging.getLogger(__name__)
 
